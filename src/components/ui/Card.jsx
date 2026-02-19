@@ -1,7 +1,7 @@
 export default function Card({ children, className = '', hover = false, ...props }) {
     return (
         <div
-            className={`bg-white rounded-[var(--radius-lg)] border border-[var(--color-border)] shadow-[var(--shadow-sm)] ${hover ? 'hover:shadow-[var(--shadow-md)] transition-shadow duration-200' : ''
+            className={`bg-white rounded-2xl border border-slate-100 shadow-sm ${hover ? 'hover:shadow-md hover:-translate-y-0.5 transition-all duration-200' : ''
                 } ${className}`}
             {...props}
         >
@@ -12,7 +12,7 @@ export default function Card({ children, className = '', hover = false, ...props
 
 export function CardHeader({ children, className = '' }) {
     return (
-        <div className={`px-6 py-4 border-b border-[var(--color-border)] ${className}`}>
+        <div className={`px-6 py-4 border-b border-slate-100 ${className}`}>
             {children}
         </div>
     );
