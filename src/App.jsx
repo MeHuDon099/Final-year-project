@@ -1,16 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './layouts/DashboardLayout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Members from './pages/Members';
+import MemberProfile from './pages/MemberProfile';
+import Books from './pages/Books';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div><h1 className='text-red-700'>Hello</h1></div>
-      
-      
-  )
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            borderRadius: 'var(--radius-md)',
+            background: '#0f172a',
+            color: '#fff',
+            fontSize: '14px',
+          },
+        }}
+      />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route
+            path="members"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Members />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="members/:id"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <MemberProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="books"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Books />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+      </Routes>
+    </>
+  );
 }
 
-export default App
+export default App;
