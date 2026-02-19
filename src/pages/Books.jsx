@@ -3,6 +3,7 @@ import {
     collection, getDocs, deleteDoc, doc, query, orderBy,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../contexts/AuthContext';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import AddBookModal from '../components/books/AddBookModal';
@@ -42,6 +43,9 @@ const BOOK_GRADIENTS = [
 ];
 
 export default function Books() {
+    const { role } = useAuth();
+    const isAdmin = role === 'admin';
+
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -91,11 +95,15 @@ export default function Books() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
                 <div>
                     <h1 className="text-xl font-bold text-slate-900">Books</h1>
-                    <p className="text-sm text-slate-400 mt-0.5">Manage your library catalogue</p>
+                    <p className="text-sm text-slate-400 mt-0.5">
+                        {isAdmin ? 'Manage your library catalogue' : 'Browse the library catalogue'}
+                    </p>
                 </div>
-                <Button icon={HiOutlinePlus} onClick={() => setShowAddModal(true)}>
-                    Add Book
-                </Button>
+                {isAdmin && (
+                    <Button icon={HiOutlinePlus} onClick={() => setShowAddModal(true)}>
+                        Add Book
+                    </Button>
+                )}
             </div>
 
             {/* Search + Category chips */}
@@ -138,10 +146,10 @@ export default function Books() {
                         <HiOutlineBookOpen className="w-8 h-8 text-slate-400" />
                     </div>
                     <p className="font-semibold text-slate-700">
-                        {searchTerm || categoryFilter !== 'All' ? 'No books match your filters' : 'No books yet'}
+                        {searchTerm || categoryFilter !== 'All' ? 'No books match your filters' : 'No books in the catalogue yet'}
                     </p>
                     <p className="text-sm text-slate-400 mt-1">
-                        {searchTerm || categoryFilter !== 'All' ? 'Try different search terms' : 'Click "Add Book" to get started'}
+                        {searchTerm || categoryFilter !== 'All' ? 'Try different search terms or clear the filter' : 'Check back soon!'}
                     </p>
                 </div>
             ) : (
@@ -158,7 +166,7 @@ export default function Books() {
                                     className="bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
                                 >
                                     {/* Book spine / cover art */}
-                                    <div className={`h-36 bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
+                                    <div className={`h-36 bg-linear-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
                                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }} />
                                         <HiOutlineBookOpen className="w-12 h-12 text-white/70" />
                                         {/* Available badge */}
@@ -200,21 +208,23 @@ export default function Books() {
                                             </div>
                                         </div>
 
-                                        {/* Actions */}
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setEditBook(book)}
-                                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-                                            >
-                                                <HiOutlinePencilSquare className="w-3.5 h-3.5" /> Edit
-                                            </button>
-                                            <button
-                                                onClick={() => setDeleteTarget(book)}
-                                                className="p-2 rounded-xl text-slate-400 bg-slate-100 hover:bg-red-100 hover:text-red-500 transition-colors cursor-pointer"
-                                            >
-                                                <HiOutlineTrash className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
+                                        {/* Admin-only actions */}
+                                        {isAdmin && (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setEditBook(book)}
+                                                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                                                >
+                                                    <HiOutlinePencilSquare className="w-3.5 h-3.5" /> Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteTarget(book)}
+                                                    className="p-2 rounded-xl text-slate-400 bg-slate-100 hover:bg-red-100 hover:text-red-500 transition-colors cursor-pointer"
+                                                >
+                                                    <HiOutlineTrash className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -223,20 +233,24 @@ export default function Books() {
                 </>
             )}
 
-            <AddBookModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSuccess={fetchBooks} />
-            {editBook && (
-                <EditBookModal isOpen={!!editBook} onClose={() => setEditBook(null)} book={editBook} onSuccess={fetchBooks} />
+            {/* Admin-only modals */}
+            {isAdmin && (
+                <>
+                    <AddBookModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSuccess={fetchBooks} />
+                    {editBook && (
+                        <EditBookModal isOpen={!!editBook} onClose={() => setEditBook(null)} book={editBook} onSuccess={fetchBooks} />
+                    )}
+                    <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Book" size="sm">
+                        <p className="text-sm text-slate-500 mb-6">
+                            Delete <span className="font-semibold text-slate-800">"{deleteTarget?.title}"</span>? This cannot be undone.
+                        </p>
+                        <div className="flex justify-end gap-2.5">
+                            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+                            <Button variant="danger" onClick={handleDelete}>Delete</Button>
+                        </div>
+                    </Modal>
+                </>
             )}
-
-            <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Book" size="sm">
-                <p className="text-sm text-slate-500 mb-6">
-                    Delete <span className="font-semibold text-slate-800">"{deleteTarget?.title}"</span>? This cannot be undone.
-                </p>
-                <div className="flex justify-end gap-2.5">
-                    <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
-                    <Button variant="danger" onClick={handleDelete}>Delete</Button>
-                </div>
-            </Modal>
         </div>
     );
 }

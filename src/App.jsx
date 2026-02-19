@@ -8,6 +8,7 @@ import Members from './pages/Members';
 import MemberProfile from './pages/MemberProfile';
 import Books from './pages/Books';
 import Transactions from './pages/Transactions';
+import MyBorrows from './pages/MyBorrows';
 
 function App() {
   return (
@@ -41,8 +42,9 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="members" element={<ProtectedRoute requiredRole="admin"><Members /></ProtectedRoute>} />
           <Route path="members/:id" element={<ProtectedRoute requiredRole="admin"><MemberProfile /></ProtectedRoute>} />
-          <Route path="books" element={<ProtectedRoute requiredRole="admin"><Books /></ProtectedRoute>} />
+          <Route path="books" element={<Books />} />
           <Route path="transactions" element={<ProtectedRoute requiredRole="admin"><Transactions /></ProtectedRoute>} />
+          <Route path="my-borrows" element={<MyBorrows />} />
         </Route>
       </Routes>
     </>

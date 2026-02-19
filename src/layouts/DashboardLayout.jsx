@@ -11,13 +11,20 @@ import {
     HiOutlineXMark,
     HiMiniBookOpen,
     HiOutlineArrowsRightLeft,
+    HiOutlineArchiveBox,
 } from 'react-icons/hi2';
 
-const navItems = [
+const adminNav = [
     { to: '/', icon: HiOutlineHome, label: 'Dashboard', end: true },
-    { to: '/members', icon: HiOutlineUsers, label: 'Members', adminOnly: true },
-    { to: '/books', icon: HiOutlineBookmarkSquare, label: 'Books', adminOnly: true },
-    { to: '/transactions', icon: HiOutlineArrowsRightLeft, label: 'Transactions', adminOnly: true },
+    { to: '/members', icon: HiOutlineUsers, label: 'Members' },
+    { to: '/books', icon: HiOutlineBookmarkSquare, label: 'Books' },
+    { to: '/transactions', icon: HiOutlineArrowsRightLeft, label: 'Transactions' },
+];
+
+const memberNav = [
+    { to: '/', icon: HiOutlineHome, label: 'Dashboard', end: true },
+    { to: '/books', icon: HiOutlineBookmarkSquare, label: 'Browse Books' },
+    { to: '/my-borrows', icon: HiOutlineArchiveBox, label: 'My Borrows' },
 ];
 
 function Avatar({ name, email, size = 'md' }) {
@@ -36,6 +43,9 @@ export default function DashboardLayout() {
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    const isAdmin = role === 'admin';
+    const navItems = isAdmin ? adminNav : memberNav;
+
     const handleLogout = async () => {
         try {
             await logout();
@@ -46,9 +56,7 @@ export default function DashboardLayout() {
         }
     };
 
-    const filteredNav = navItems.filter((item) => !item.adminOnly || role === 'admin');
-
-    const currentNav = filteredNav.find((n) =>
+    const currentNav = navItems.find((n) =>
         n.end ? location.pathname === n.to : location.pathname.startsWith(n.to)
     );
 
@@ -65,9 +73,9 @@ export default function DashboardLayout() {
             {/* Nav */}
             <nav className="flex-1 px-3 pt-1 pb-4 space-y-0.5">
                 <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-3 pt-3 pb-2">
-                    Navigation
+                    {isAdmin ? 'Admin Panel' : 'Library'}
                 </p>
-                {filteredNav.map((item) => (
+                {navItems.map((item) => (
                     <NavLink
                         key={item.to}
                         to={item.to}
@@ -95,7 +103,7 @@ export default function DashboardLayout() {
                             {currentUser?.displayName || currentUser?.email?.split('@')[0]}
                         </p>
                         <p className="text-xs text-slate-400 truncate">
-                            {role === 'admin' ? '👑 Admin / Librarian' : '🎓 Member'}
+                            {isAdmin ? '👑 Admin / Librarian' : '🎓 Member'}
                         </p>
                     </div>
                 </div>
