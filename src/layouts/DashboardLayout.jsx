@@ -3,7 +3,6 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import {
-    HiOutlineBookOpen,
     HiOutlineHome,
     HiOutlineUsers,
     HiOutlineBookmarkSquare,
@@ -11,19 +10,21 @@ import {
     HiOutlineBars3,
     HiOutlineXMark,
     HiMiniBookOpen,
+    HiOutlineArrowsRightLeft,
 } from 'react-icons/hi2';
 
 const navItems = [
     { to: '/', icon: HiOutlineHome, label: 'Dashboard', end: true },
     { to: '/members', icon: HiOutlineUsers, label: 'Members', adminOnly: true },
     { to: '/books', icon: HiOutlineBookmarkSquare, label: 'Books', adminOnly: true },
+    { to: '/transactions', icon: HiOutlineArrowsRightLeft, label: 'Transactions', adminOnly: true },
 ];
 
 function Avatar({ name, email, size = 'md' }) {
     const initials = (name?.[0] || email?.[0] || '?').toUpperCase();
     const s = size === 'sm' ? 'w-7 h-7 text-xs' : 'w-9 h-9 text-sm';
     return (
-        <div className={`${s} rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold shrink-0`}>
+        <div className={`${s} rounded-full bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold shrink-0`}>
             {initials}
         </div>
     );
@@ -47,7 +48,6 @@ export default function DashboardLayout() {
 
     const filteredNav = navItems.filter((item) => !item.adminOnly || role === 'admin');
 
-    // Current page title
     const currentNav = filteredNav.find((n) =>
         n.end ? location.pathname === n.to : location.pathname.startsWith(n.to)
     );

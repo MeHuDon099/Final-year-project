@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Members from './pages/Members';
 import MemberProfile from './pages/MemberProfile';
 import Books from './pages/Books';
+import Transactions from './pages/Transactions';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="members" element={<ProtectedRoute requiredRole="admin"><Members /></ProtectedRoute>} />
           <Route path="members/:id" element={<ProtectedRoute requiredRole="admin"><MemberProfile /></ProtectedRoute>} />
           <Route path="books" element={<ProtectedRoute requiredRole="admin"><Books /></ProtectedRoute>} />
+          <Route path="transactions" element={<ProtectedRoute requiredRole="admin"><Transactions /></ProtectedRoute>} />
         </Route>
       </Routes>
     </>

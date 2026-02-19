@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import AddMemberModal from '../components/members/AddMemberModal';
 import EditMemberModal from '../components/members/EditMemberModal';
+import IssueBookModal from '../components/borrowing/IssueBookModal';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -16,6 +17,7 @@ import {
     HiOutlineTrash,
     HiOutlineEye,
     HiOutlineUsers,
+    HiOutlineArrowsRightLeft,
 } from 'react-icons/hi2';
 
 export default function Members() {
@@ -25,6 +27,7 @@ export default function Members() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [editMember, setEditMember] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
+    const [issueForMember, setIssueForMember] = useState(null);
     const navigate = useNavigate();
 
     const fetchMembers = async () => {
@@ -128,7 +131,7 @@ export default function Members() {
                                 <tr key={member.id} className="hover:bg-slate-50/80 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
+                                            <div className={`w-9 h-9 rounded-full bg-linear-to-br ${avatarGradients[i % avatarGradients.length]} flex items-center justify-center text-white text-sm font-bold shrink-0`}>
                                                 {initials(member.name)}
                                             </div>
                                             <div>
@@ -156,9 +159,16 @@ export default function Members() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center justify-end gap-1">
                                             <button
+                                                onClick={() => setIssueForMember(member)}
+                                                title="Issue Book"
+                                                className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                                            >
+                                                <HiOutlineArrowsRightLeft className="w-4 h-4" />
+                                            </button>
+                                            <button
                                                 onClick={() => navigate(`/members/${member.id}`)}
                                                 title="View profile"
-                                                className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                                                className="p-2 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 transition-colors cursor-pointer"
                                             >
                                                 <HiOutlineEye className="w-4 h-4" />
                                             </button>
@@ -183,8 +193,6 @@ export default function Members() {
                         </tbody>
                     </table>
                 )}
-
-                {/* Footer row */}
                 {!loading && filtered.length > 0 && (
                     <div className="px-6 py-3 border-t border-slate-50 bg-slate-50/50">
                         <p className="text-xs text-slate-400">{filtered.length} member{filtered.length !== 1 ? 's' : ''}</p>
@@ -196,8 +204,15 @@ export default function Members() {
             {editMember && (
                 <EditMemberModal isOpen={!!editMember} onClose={() => setEditMember(null)} member={editMember} onSuccess={fetchMembers} />
             )}
+            {issueForMember && (
+                <IssueBookModal
+                    isOpen={!!issueForMember}
+                    onClose={() => setIssueForMember(null)}
+                    onSuccess={fetchMembers}
+                    preselectedMember={issueForMember}
+                />
+            )}
 
-            {/* Delete confirm */}
             <Modal isOpen={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Member" size="sm">
                 <p className="text-sm text-slate-500 mb-6">
                     Delete <span className="font-semibold text-slate-800">{deleteTarget?.name}</span>? This cannot be undone.
