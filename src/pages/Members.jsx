@@ -5,13 +5,11 @@ import {
 import { db } from '../firebase';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
-import AddMemberModal from '../components/members/AddMemberModal';
 import EditMemberModal from '../components/members/EditMemberModal';
 import IssueBookModal from '../components/borrowing/IssueBookModal';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import {
-    HiOutlinePlus,
     HiOutlineMagnifyingGlass,
     HiOutlinePencilSquare,
     HiOutlineTrash,
@@ -24,7 +22,6 @@ export default function Members() {
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [showAddModal, setShowAddModal] = useState(false);
     const [editMember, setEditMember] = useState(null);
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [issueForMember, setIssueForMember] = useState(null);
@@ -78,11 +75,8 @@ export default function Members() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
                 <div>
                     <h1 className="text-xl font-bold text-slate-900">Members</h1>
-                    <p className="text-sm text-slate-400 mt-0.5">Manage library members</p>
+                    <p className="text-sm text-slate-400 mt-0.5">Auto-registered on sign-in</p>
                 </div>
-                <Button icon={HiOutlinePlus} onClick={() => setShowAddModal(true)}>
-                    Add Member
-                </Button>
             </div>
 
             {/* Search */}
@@ -112,7 +106,7 @@ export default function Members() {
                             {searchTerm ? 'No members match your search' : 'No members yet'}
                         </p>
                         <p className="text-sm text-slate-400 mt-1">
-                            {searchTerm ? 'Try a different keyword' : 'Click "Add Member" to get started'}
+                            {searchTerm ? 'Try a different keyword' : 'Members are auto-registered on sign-in'}
                         </p>
                     </div>
                 ) : (
@@ -150,8 +144,8 @@ export default function Members() {
                                     </td>
                                     <td className="px-6 py-4 hidden lg:table-cell">
                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${(member.borrowedBooks || 0) > 0
-                                                ? 'bg-amber-50 text-amber-700'
-                                                : 'bg-slate-100 text-slate-500'
+                                            ? 'bg-amber-50 text-amber-700'
+                                            : 'bg-slate-100 text-slate-500'
                                             }`}>
                                             {member.borrowedBooks || 0}
                                         </span>
@@ -200,7 +194,6 @@ export default function Members() {
                 )}
             </div>
 
-            <AddMemberModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSuccess={fetchMembers} />
             {editMember && (
                 <EditMemberModal isOpen={!!editMember} onClose={() => setEditMember(null)} member={editMember} onSuccess={fetchMembers} />
             )}

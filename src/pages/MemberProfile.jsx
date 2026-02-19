@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import Button from '../components/ui/Button';
 import ReturnBookModal from '../components/borrowing/ReturnBookModal';
@@ -35,6 +35,7 @@ export default function MemberProfile() {
     const [showIssue, setShowIssue] = useState(false);
 
     const fetchData = async () => {
+        // Fetch member doc
         try {
             const docSnap = await getDoc(doc(db, 'members', id));
             if (!docSnap.exists()) {
@@ -43,17 +44,29 @@ export default function MemberProfile() {
                 return;
             }
             setMember({ id: docSnap.id, ...docSnap.data() });
+        } catch {
+            toast.error('Failed to load member profile');
+            setLoading(false);
+            return;
+        }
 
-            // Fetch from transactions collection, filtered by memberId
+        // Fetch transactions (no orderBy — avoids composite index requirement, sort client-side)
+        try {
             const q = query(
                 collection(db, 'transactions'),
-                where('memberId', '==', id),
-                orderBy('issuedAt', 'desc')
+                where('memberId', '==', id)
             );
             const snap = await getDocs(q);
-            setTransactions(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        } catch (err) {
-            toast.error('Failed to load member profile');
+            const txList = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            // Sort newest-first on the client
+            txList.sort((a, b) => {
+                const aTime = a.issuedAt?.toDate?.()?.getTime() ?? 0;
+                const bTime = b.issuedAt?.toDate?.()?.getTime() ?? 0;
+                return bTime - aTime;
+            });
+            setTransactions(txList);
+        } catch {
+            toast.error('Could not load transaction history');
         } finally {
             setLoading(false);
         }
@@ -119,8 +132,8 @@ export default function MemberProfile() {
                         <p className="text-slate-400 text-sm mt-0.5">{member.email}</p>
                     </div>
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${(member.borrowedBooks || 0) > 0
-                            ? 'bg-amber-50 text-amber-700'
-                            : 'bg-emerald-50 text-emerald-700'
+                        ? 'bg-amber-50 text-amber-700'
+                        : 'bg-emerald-50 text-emerald-700'
                         }`}>
                         {(member.borrowedBooks || 0) > 0 ? '📚' : '✅'}
                         {member.borrowedBooks || 0} book{(member.borrowedBooks || 0) !== 1 ? 's' : ''} borrowed
